@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DwellSafe - Login & Signup</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+    h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
+    .input-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    button { width: 100%; padding: 10px; background: #27ae60; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+    button:hover { background: #219653; }
+    .switch { text-align: center; margin-top: 15px; font-size: 14px; }
+    .switch a { color: #27ae60; text-decoration: none; cursor: pointer; }
+    .error { color: #e74c3c; font-size: 13px; margin-bottom: 10px; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2 id="form-title">DwellSafe Login</h2>
+    <div id="error-msg" class="error"></div>
+
+    <form id="auth-form">
+      <div class="input-group">
+        <label>Email Address</label>
+        <input type="email" id="email" required placeholder="user@eksu.edu.ng">
+      </div>
+
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="password" required placeholder="••••••••">
+      </div>
+
+      <!-- Role selection only appears during Signup (restricted to student/landlord for safety) -->
+      <div class="input-group" id="role-group" style="display: none;">
+        <label>I am a:</label>
+        <select id="role">
+          <option value="student">Student (Looking for Hostel)</option>
+          <option value="landlord">Landlord (Listing Hostels)</option>
+        </select>
+      </div>
+
+      <button type="submit" id="submit-btn">Login</button>
+    </form>
+
+    <div class="switch">
+      <p id="switch-text">Don't have an account? <a onclick="toggleMode()">Sign up</a></p>
+    </div>
+  </div>
+
+  <!-- Supabase Library & Config -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="shared/supabase.js"></script>
+
+  <script>
+    let isSignup = false;
+
+    function toggleMode() {
+      isSignup = !isSignup;
+      document.getElementById('form-title').innerText = isSignup ? 'DwellSafe Signup' : 'DwellSafe Login';
+      document.getElementById('submit-btn').innerText = isSignup ? 'Create Account' : 'Login';
+      document.getElementById('role-group').style.display = isSignup ? 'block' : 'none';
+      document.getElementById('switch-text').innerHTML = isSignup 
+        ? 'Already have an account? <a onclick="toggleMode()">Login</a>' 
+        : 'Don\'t have an account? <a onclick="toggleMode()">Sign up</a>';
+      document.getElementById('error-msg').innerText = '';
+    }
+
+    // Helper function to check profile role and direct user properly
+    async function redirectUser(userId) {
+      const { data: profile, error } = await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+
+      if (error || !profile) {
+        // Fallback if profile row is still syncing
+        window.location.href = 'student.html';
+        return;
+      }
+
+      // Route based on database role
+      if (profile.role === 'admin') {
+        window.location.href = 'admin.html';
+      } else if (profile.role === 'landlord') {
+        window.location.href = 'landlord.html';
+      } else {
+        window.location.href = 'student.html';
+      }
+    }
+
+    document.getElementById('auth-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorDiv = document.getElementById('error-msg');
+      errorDiv.innerText = '';
+
+      if (isSignup) {
+        // --- SIGNUP PROCESS ---
+        const role = document.getElementById('role').value;
+        const { data, error } = await supabaseClient.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: { role: role } 
+          }
+        });
+
+        if (error) {
+          errorDiv.innerText = error.message;
+        } else {
+          alert('Signup successful! You can now log in.');
+          toggleMode();
+        }
+
+      } else {
+        // --- LOGIN PROCESS ---
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+        if (error) {
+          errorDiv.innerText = error.message;
+        } else {
+          // Check role and redirect to the correct dashboard
+          redirectUser(data.user.id);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
