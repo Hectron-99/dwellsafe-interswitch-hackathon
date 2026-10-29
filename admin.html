@@ -45,11 +45,11 @@
   <script src="shared/supabase.js"></script>
 
   <script>
-    // Protect page: redirect to auth if not logged in
+    // Protect page: redirect to login if not logged in
     async function checkAdmin() {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (!session) {
-        window.location.href = 'auth.html';
+        window.location.href = 'login.html';
         return;
       }
 
@@ -62,7 +62,7 @@
 
       if (error || !profile || profile.role !== 'admin') {
         alert('Access denied. Admins only.');
-        window.location.href = 'auth.html';
+        window.location.href = 'login.html';
       } else {
         loadUsers();
       }
@@ -100,7 +100,7 @@
 
     async function logout() {
       await supabaseClient.auth.signOut();
-      window.location.href = 'auth.html';
+      window.location.href = 'login.html';
     }
   </script>
 </body>
