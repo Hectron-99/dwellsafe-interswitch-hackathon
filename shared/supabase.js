@@ -1,9 +1,9 @@
-// DWELLSAFE - Shared Supabase connection
-// Replace the two values below with your Project URL and publishable (anon) key
+// shared/supabase.js
 
-const SUPABASE_URL = 'https://obfeamgcbxbzedilnywi.supabase.co'
-const SUPABASE_ANON_KEY = 'sb_publishable_VG_b67vfQSRnPQl0Ht4AnA_1rjPtzz-'
-// Load the Supabase client from CDN (add this script tag in every HTML page before this file):
-// <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+// 1. Replace these with your actual Supabase project details from your notes
+const SUPABASE_URL = 'https://obfeamgcbxbzedilnywi.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_VG_b67vfQSRnPQl0Ht4AnA_1rjPtzz';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+// 2. Initialize the Supabase client (requires the Supabase CDN script loaded in your HTML)
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
