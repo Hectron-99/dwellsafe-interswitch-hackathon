@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Supabase Test</title>
+</head>
+<body>
+  <h1>Testing the Supabase telephone...</h1>
+  <p id="result">Please wait...</p>
+
+  <!-- Supabase library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Our connection file -->
+  <script src="shared/supabase.js"></script>
+
+  <script>
+    // Try to talk to Supabase
+    async function testConnection() {
+      try {
+        const { data, error } = await supabase.from('profiles').select('count').limit(1)
+        
+        if (error) {
+          document.getElementById('result').innerText = 'Problem: ' + error.message
+          console.error(error)
+        } else {
+          document.getElementById('result').innerText = 'Good news! The telephone is working.'
+        }
+      } catch (err) {
+        document.getElementById('result').innerText = 'Big problem: ' + err.message
+        console.error(err)
+      }
+    }
+
+    testConnection()
+  </script>
+</body>
+</html>
