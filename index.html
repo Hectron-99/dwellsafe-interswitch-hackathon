@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DWELLSAFE</title>
+<style>
+  :root {
+    --bg: #f2f6f4;
+    --ink: #12352e;
+    --muted: #4a6660;
+    --card: #ffffff;
+    --line: #c9d9d3;
+    --accent: #0f6b5a;
+    --accent-ink: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif;
+  }
+  main { width: 100%; max-width: 560px; }
+  h1 { font-size: 2.2rem; margin: 0 0 8px; line-height: 1.15; }
+  p.lead { margin: 0 0 28px; color: var(--muted); font-size: 1.05rem; line-height: 1.5; }
+  .choices { display: grid; gap: 14px; }
+  a.choice {
+    display: block;
+    padding: 18px 20px;
+    background: var(--card);
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+  }
+  a.choice:hover, a.choice:focus-visible { border-color: var(--accent); outline: none; }
+  a.choice strong { display: block; font-size: 1.2rem; margin-bottom: 4px; }
+  a.choice span { color: var(--muted); font-size: 0.98rem; }
+  @media (prefers-reduced-motion: no-preference) {
+    a.choice { transition: border-color 0.15s; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>DWELLSAFE</h1>
+  <p class="lead">Find a hostel near your school, or list one. Choose who you are to start.</p>
+
+  <nav class="choices" aria-label="Choose your role">
+    <a class="choice" href="student/index.html">
+      <strong>I am a student</strong>
+      <span>Search hostels, watch room videos, and book.</span>
+    </a>
+    <a class="choice" href="landlord/index.html">
+      <strong>I am a landlord</strong>
+      <span>Post your rooms and manage your listings.</span>
+    </a>
+    <a class="choice" href="admin/index.html">
+      <strong>I am an admin</strong>
+      <span>Verify landlords and read complaints.</span>
+    </a>
+  </nav>
+</main>
+</body>
+</html>
