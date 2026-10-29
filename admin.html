@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DwellSafe - Admin Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .header h2 { margin: 0; color: #2c3e50; }
+    button.logout-btn { background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    button.logout-btn:hover { background: #c0392b; }
+    .container { margin-top: 20px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; border: 1px solid #ddd; text-align: left; font-size: 14px; }
+    th { background-color: #2c3e50; color: white; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h2>DwellSafe - Admin Portal</h2>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="container">
+    <h3>Registered Users & Roles</h3>
+    <table id="users-table">
+      <thead>
+        <tr>
+          <th>User ID</th>
+          <th>Role</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody id="users-body">
+        <tr><td colspan="3">Loading profiles...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Supabase Library & Config -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="shared/supabase.js"></script>
+
+  <script>
+    // Protect page: redirect to auth if not logged in
+    async function checkAdmin() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) {
+        window.location.href = 'auth.html';
+        return;
+      }
+
+      // Verify if current user is actually an admin
+      const { data: profile, error } = await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+      if (error || !profile || profile.role !== 'admin') {
+        alert('Access denied. Admins only.');
+        window.location.href = 'auth.html';
+      } else {
+        loadUsers();
+      }
+    }
+    checkAdmin();
+
+    async function loadUsers() {
+      const { data: profiles, error } = await supabaseClient
+        .from('profiles')
+        .select('*');
+
+      const tbody = document.getElementById('users-body');
+      tbody.innerHTML = '';
+
+      if (error) {
+        tbody.innerHTML = `<tr><td colspan="3" style="color:red;">Error loading profiles: ${error.message}</td></tr>`;
+        return;
+      }
+
+      if (profiles.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3">No profiles found.</td></tr>`;
+        return;
+      }
+
+      profiles.forEach(user => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${user.id}</td>
+          <td><strong>${user.role}</strong></td>
+          <td>${new Date(user.created_at).toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      window.location.href = 'auth.html';
+    }
+  </script>
+</body>
+</html>
