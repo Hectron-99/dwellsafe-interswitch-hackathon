@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DwellSafe - Student Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .header h2 { margin: 0; color: #2c3e50; }
+    button { background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    button:hover { background: #c0392b; }
+    .container { margin-top: 20px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h2>DwellSafe - Student Portal</h2>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <div class="container">
+    <h3>Available Hostels Near EKSU</h3>
+    <p>Loading verified hostels...</p>
+    <!-- We will add the hostel list here next -->
+  </div>
+
+  <!-- Supabase Library & Config -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="shared/supabase.js"></script>
+
+  <script>
+    // Protect page: redirect to auth if not logged in
+    async function checkUser() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) {
+        window.location.href = 'auth.html';
+      }
+    }
+    checkUser();
+
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      window.location.href = 'auth.html';
+    }
+  </script>
+</body>
+</html>
