@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DwellSafe - Landlord Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .header h2 { margin: 0; color: #2c3e50; }
+    button.logout-btn { background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    button.logout-btn:hover { background: #c0392b; }
+    .container { margin-top: 20px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 600px; margin-left: auto; margin-right: auto; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+    input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    button.submit-btn { background: #27ae60; color: white; border: none; padding: 12px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; }
+    button.submit-btn:hover { background: #219653; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h2>DwellSafe - Landlord Portal</h2>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="container">
+    <h3>List a New Hostel</h3>
+    <form id="hostel-form">
+      <div class="form-group">
+        <label>Hostel Name</label>
+        <input type="text" id="hostel-name" required placeholder="e.g., Grace Lodge">
+      </div>
+      <div class="form-group">
+        <label>Location / Address</label>
+        <input type="text" id="hostel-location" required placeholder="e.g., Campsite, Ado-Ekiti">
+      </div>
+      <div class="form-group">
+        <label>Price per Year (₦)</label>
+        <input type="number" id="hostel-price" required placeholder="150000">
+      </div>
+      <div class="form-group">
+        <label>Description & Amenities</label>
+        <textarea id="hostel-desc" rows="3" placeholder="Self-con, water available, steady light..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Video Walkthrough Link (YouTube / Direct URL)</label>
+        <input type="url" id="hostel-video" placeholder="https://www.youtube.com/watch?v=...">
+      </div>
+      <button type="submit" class="submit-btn">Publish Listing</button>
+    </form>
+  </div>
+
+  <!-- Supabase Library & Config -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="shared/supabase.js"></script>
+
+  <script>
+    // Protect page: redirect to auth if not logged in
+    async function checkUser() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) {
+        window.location.href = 'auth.html';
+      }
+    }
+    checkUser();
+
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      window.location.href = 'auth.html';
+    }
+
+    // Handle Hostel Listing Submission
+    document.getElementById('hostel-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) return alert('You must be logged in!');
+
+      const name = document.getElementById('hostel-name').value;
+      const location = document.getElementById('hostel-location').value;
+      const price = document.getElementById('hostel-price').value;
+      const description = document.getElementById('hostel-desc').value;
+      const videoUrl = document.getElementById('hostel-video').value;
+
+      const { error } = await supabaseClient
+        .from('hostels')
+        .insert([
+          { 
+            landlord_id: user.id, 
+            name: name, 
+            location: location, 
+            price: price, 
+            description: description,
+            video_url: videoUrl
+          }
+        ]);
+
+      if (error) {
+        alert('Error publishing listing: ' + error.message);
+      } else {
+        alert('Hostel published successfully!');
+        document.getElementById('hostel-form').reset();
+      }
+    });
+  </script>
+</body>
+</html>
