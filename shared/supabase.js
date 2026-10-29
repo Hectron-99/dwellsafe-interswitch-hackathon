@@ -6,4 +6,4 @@ const SUPABASE_ANON_KEY = 'sb_publishable_VG_b67vfQSRnPQl0Ht4AnA_1rjPtzz';
 
 // 2. Initialize the Supabase client (requires the Supabase CDN script loaded in your HTML)
 const { createClient } = supabase;
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
