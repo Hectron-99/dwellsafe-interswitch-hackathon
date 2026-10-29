@@ -40,11 +40,11 @@
   <script src="shared/supabase.js"></script>
 
   <script>
-    // Protect page: redirect to auth if not logged in
+    // Protect page: redirect to login if not logged in
     async function checkUser() {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (!session) {
-        window.location.href = 'auth.html';
+        window.location.href = 'login.html';
       } else {
         loadHostels();
       }
@@ -91,7 +91,7 @@
 
     async function logout() {
       await supabaseClient.auth.signOut();
-      window.location.href = 'auth.html';
+      window.location.href = 'login.html';
     }
   </script>
 </body>
