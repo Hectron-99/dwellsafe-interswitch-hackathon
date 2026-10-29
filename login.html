@@ -1,3 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DwellSafe - Login / Register</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .auth-container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+    h2 { margin-top: 0; color: #2c3e50; text-align: center; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; color: #34495e; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+    button.auth-btn { background: #0f6b5a; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; }
+    button.auth-btn:hover { background: #0b4f42; }
+    .toggle-link { text-align: center; margin-top: 15px; font-size: 14px; color: #7f8c8d; cursor: pointer; }
+    .toggle-link span { color: #0f6b5a; font-weight: bold; }
+    .error-msg { color: #e74c3c; font-size: 13px; margin-bottom: 10px; text-align: center; }
+    .success-msg { color: #27ae60; font-size: 13px; margin-bottom: 10px; text-align: center; }
+    .role-group { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="auth-container">
+    <h2 id="form-title">Login to DwellSafe</h2>
+    <div id="message"></div>
+
+    <form id="auth-form">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="email" required placeholder="name@example.com">
+      </div>
+      
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" required placeholder="••••••••">
+      </div>
+
+      <!-- Role selection only shows during Registration -->
+      <div class="form-group role-group" id="role-group">
+        <label>I am a:</label>
+        <select id="role">
+          <option value="student">Student</option>
+          <option value="landlord">Landlord</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+
+      <button type="submit" class="auth-btn" id="submit-btn">Login</button>
+    </form>
+
+    <div class="toggle-link" onclick="toggleMode()">
+      Don't have an account? <span id="toggle-text">Register here</span>
+    </div>
+  </div>
+
+  <!-- Supabase Library & Config -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="shared/supabase.js"></script>
+
+  <script>
+    let isLoginMode = true;
+
+    function toggleMode() {
+      isLoginMode = !isLoginMode;
+      document.getElementById('form-title').innerText = isLoginMode ? 'Login to DwellSafe' : 'Create an Account';
+      document.getElementById('submit-btn').innerText = isLoginMode ? 'Login' : 'Register';
+      document.getElementById('toggle-text').innerText = isLoginMode ? 'Register here' : 'Login here';
+      document.getElementById('role-group').style.display = isLoginMode ? 'none' : 'block';
+      document.getElementById('message').innerHTML = '';
+    }
+
     async function redirectUser(userId) {
       const { data: profile, error } = await supabaseClient
         .from('profiles')
@@ -21,3 +94,45 @@
         window.location.href = baseFolder + 'student.html';
       }
     }
+
+    document.getElementById('auth-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const msgDiv = document.getElementById('message');
+      msgDiv.innerHTML = '';
+
+      if (isLoginMode) {
+        // --- LOGIN FLOW ---
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        
+        if (error) {
+          msgDiv.innerHTML = `<div class="error-msg">${error.message}</div>`;
+        } else {
+          msgDiv.innerHTML = `<div class="success-msg">Login successful! Redirecting...</div>`;
+          redirectUser(data.user.id);
+        }
+      } else {
+        // --- REGISTRATION FLOW ---
+        const role = document.getElementById('role').value;
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { role: role } // Pass role into user metadata
+          }
+        });
+
+        if (error) {
+          msgDiv.innerHTML = `<div class="error-msg">${error.message}</div>`;
+        } else {
+          msgDiv.innerHTML = `<div class="success-msg">Account created successfully! Redirecting...</div>`;
+          if (data.user) {
+            redirectUser(data.user.id);
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
