@@ -9,12 +9,15 @@
 
   <!-- Supabase library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <!-- Our connection file -->
-  <script src="shared/supabase.js"></script>
 
   <script>
-    // Try to talk to Supabase
+    // Direct connection test
+    const SUPABASE_URL = 'https://obfeamgcbxbzedilnywi.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_VG_b67vfQSRnPQl0Ht4AnA_1rjPtzz-';
+
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     async function testConnection() {
       try {
         const { data, error } = await supabaseClient.from('profiles').select('count').limit(1)
